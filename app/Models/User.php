@@ -3,6 +3,8 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use Faker\Provider\Payment;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -21,6 +23,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'reputation',
+        'role_id',
     ];
 
     /**
@@ -45,4 +49,26 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
-}
+    public function role(){
+        return $this->belongsTo(Role::class);
+    }
+    public function colocation(){
+        return $this->belongsToMany(Colocation::class,'memberships')->withPivot('role','joined_at','left_at')->withTimestamps();
+    }
+    public function memberships(){
+        return $this->hasMany(Membership::class);
+    }
+    public function paidExpense(){
+        return $this->hasMany(Expense::class,'paid_by');
+    }
+    public function paymentsMade(){
+        return $this->hasMany(Payment::class,'from_user_id');
+    }
+    public function paymentsReceived(){
+        return $this->hasMany(Payment::class,'to_user_id');
+    }
+    public function isAdmin(){
+        return $this->role?->name === 'admin';
+    }
+    }
+
